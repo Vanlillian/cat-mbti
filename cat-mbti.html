@@ -1,0 +1,867 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>乌米饭 · 猫咪MBTI</title>
+<style>
+  :root {
+    --cream: #FFF8F0;
+    --orange: #F4A460;
+    --orange-dark: #E8923E;
+    --brown: #4A3728;
+    --brown-light: #8B7355;
+    --card-bg: #FFFAF5;
+    --gold: #D4A853;
+    --tag-bg: #FFF0E0;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    background: var(--cream);
+    color: var(--brown);
+    min-height: 100dvh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 16px;
+  }
+
+  .app { width: 100%; max-width: 420px; position: relative; }
+
+  .screen { display: none; animation: fadeSlideIn 0.35s ease; }
+  .screen.active { display: block; }
+  @keyframes fadeSlideIn {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Welcome */
+  .welcome { text-align: center; padding: 40px 20px; }
+  .mascot { font-size: 80px; margin-bottom: 12px; animation: bounce 2s infinite; }
+  @keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+  }
+  .welcome h1 { font-size: 28px; font-weight: 800; margin-bottom: 6px; }
+  .welcome .subtitle { font-size: 14px; color: var(--brown-light); margin-bottom: 28px; line-height: 1.7; }
+
+  .input-group { text-align: left; margin-bottom: 24px; }
+  .input-group label { display: block; font-size: 14px; font-weight: 600; margin-bottom: 8px; }
+  .input-group input {
+    width: 100%; padding: 14px 16px;
+    border: 2px solid #E8D5C4; border-radius: 14px;
+    font-size: 16px; background: #fff; color: var(--brown);
+    outline: none; transition: border-color 0.2s;
+  }
+  .input-group input:focus { border-color: var(--orange); }
+
+  .btn {
+    display: inline-block; padding: 14px 32px;
+    border: none; border-radius: 50px;
+    font-size: 16px; font-weight: 600; cursor: pointer;
+    transition: transform 0.12s, box-shadow 0.12s;
+  }
+  .btn:active { transform: scale(0.97); }
+  .btn-primary {
+    background: linear-gradient(135deg, var(--orange), var(--orange-dark));
+    color: #fff; box-shadow: 0 4px 16px rgba(244, 164, 96, 0.35);
+  }
+  .btn-block { width: 100%; }
+
+  /* Quiz */
+  .quiz-header { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }
+  .quiz-header .step { font-size: 13px; color: var(--brown-light); white-space: nowrap; }
+  .progress-bar { flex: 1; height: 6px; background: #E8D5C4; border-radius: 3px; overflow: hidden; }
+  .progress-bar .fill { height: 100%; background: var(--orange); border-radius: 3px; transition: width 0.3s; }
+
+  .question-card {
+    background: #fff; border-radius: 20px; padding: 28px 22px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.04); margin-bottom: 16px;
+  }
+  .question-card .dim-badge {
+    display: inline-block; font-size: 11px; padding: 3px 10px;
+    background: var(--tag-bg); border-radius: 50px;
+    color: var(--brown-light); margin-bottom: 12px;
+  }
+  .question-card .emoji { font-size: 44px; margin-bottom: 12px; }
+  .question-card .q-text { font-size: 17px; font-weight: 600; line-height: 1.6; margin-bottom: 20px; }
+
+  .options { display: flex; flex-direction: column; gap: 8px; }
+  .option {
+    width: 100%; padding: 14px 16px;
+    background: var(--card-bg); border: 2px solid transparent;
+    border-radius: 14px; font-size: 14px; color: var(--brown);
+    cursor: pointer; text-align: left;
+    transition: all 0.15s; display: flex; align-items: center; gap: 10px;
+  }
+  .option .opt-emoji { font-size: 22px; flex-shrink: 0; }
+  .option:active { transform: scale(0.98); background: #FFF0E0; border-color: var(--orange); }
+
+  /* Result */
+  .result { text-align: center; padding: 20px 0; }
+  .result-type {
+    font-size: 13px; color: var(--orange-dark); font-weight: 700;
+    letter-spacing: 2px; margin-bottom: 6px;
+  }
+  .result-name { font-size: 34px; font-weight: 800; margin-bottom: 2px; }
+  .result-role { font-size: 15px; color: var(--brown-light); margin-bottom: 20px; }
+  .result-desc {
+    background: #fff; border-radius: 16px; padding: 18px 22px;
+    font-size: 14px; line-height: 1.8; color: var(--brown-light);
+    text-align: left; margin-bottom: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+  }
+  .cat-say {
+    background: linear-gradient(135deg, #FFF5E8, #FFEDD8);
+    border-left: 3px solid var(--orange);
+    border-radius: 0 12px 12px 0; padding: 12px 16px;
+    font-size: 14px; font-style: italic; color: var(--brown);
+    text-align: left; margin-bottom: 18px;
+  }
+  .cat-say::before { content: '💬 '; }
+
+  .score-bars { margin-bottom: 20px; text-align: left; }
+  .score-row {
+    display: flex; align-items: center; gap: 8px;
+    margin-bottom: 6px; font-size: 12px; color: var(--brown-light);
+  }
+  .score-row .bar-wrap {
+    flex: 1; height: 8px; background: #F0E8DC; border-radius: 4px; overflow: hidden;
+    display: flex;
+  }
+  .score-row .bar-left { height: 100%; background: var(--orange); border-radius: 4px 0 0 4px; transition: width 0.5s; }
+  .score-row .bar-right { height: 100%; background: #D4C4B0; border-radius: 0 4px 4px 0; }
+  .score-row .dim-label { width: 28px; font-weight: 700; text-align: center; }
+  .score-row .dim-label.winner { color: var(--orange-dark); }
+
+  .traits { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-bottom: 24px; }
+  .trait { padding: 8px 16px; background: var(--tag-bg); border-radius: 50px; font-size: 13px; font-weight: 500; }
+
+  .tips-section { margin-bottom: 24px; text-align: left; }
+  .tips-title { font-size: 15px; font-weight: 700; color: var(--brown); margin-bottom: 12px; text-align: center; }
+  .tip-item {
+    display: flex; gap: 10px; align-items: flex-start;
+    padding: 12px 16px; background: #fff; border-radius: 12px;
+    margin-bottom: 8px; font-size: 13px; line-height: 1.7; color: var(--brown-light);
+    box-shadow: 0 1px 4px rgba(0,0,0,0.03);
+  }
+  .tip-item .tip-emoji { font-size: 20px; flex-shrink: 0; margin-top: 1px; }
+
+  /* ID Card */
+  .id-card-section { margin-bottom: 24px; }
+  .id-card-section .section-title { font-size: 12px; color: var(--brown-light); margin-bottom: 10px; letter-spacing: 1px; text-transform: uppercase; }
+  .id-card {
+    background: linear-gradient(145deg, #FFFEF9, #FFF8EE);
+    border: 3px solid var(--gold); border-radius: 20px;
+    padding: 22px 20px; box-shadow: 0 4px 20px rgba(212,168,83,0.2);
+  }
+  .id-card-body { display: flex; gap: 16px; align-items: center; }
+  .photo-area {
+    width: 85px; height: 85px; border-radius: 16px;
+    background: var(--tag-bg); flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    overflow: hidden; cursor: pointer;
+    border: 2px dashed #E8D5C4; transition: border-color 0.2s;
+  }
+  .photo-area:hover { border-color: var(--orange); }
+  .photo-area img { width: 100%; height: 100%; object-fit: cover; }
+  .photo-area .placeholder { font-size: 32px; opacity: 0.5; }
+  .info { flex: 1; }
+  .info .cat-name { font-size: 20px; font-weight: 700; margin-bottom: 4px; }
+  .info .cat-type { display: inline-block; font-size: 12px; font-weight: 600; color: var(--orange-dark); background: var(--tag-bg); padding: 3px 10px; border-radius: 50px; margin-bottom: 6px; }
+  .info .cat-oneliner { font-size: 12px; color: var(--brown-light); line-height: 1.6; }
+  .info .meta { font-size: 11px; color: var(--brown-light); line-height: 1.9; }
+  .id-card-footer { margin-top: 18px; padding-top: 14px; border-top: 1px dashed #E8D5C4; display: flex; justify-content: space-between; font-size: 10px; color: #C4A882; }
+
+  .btn-secondary { background: #fff; color: var(--brown); border: 2px solid #E8D5C4; margin-top: 10px; }
+  .actions { display: flex; gap: 10px; justify-content: center; }
+  .actions .btn { flex: 1; padding: 14px 12px; font-size: 14px; }
+
+  /* Modal */
+  .modal-overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,0.4); z-index: 100;
+    justify-content: center; align-items: center; padding: 24px;
+  }
+  .modal-overlay.show { display: flex; }
+  .modal { background: #fff; border-radius: 20px; padding: 28px 24px; width: 100%; max-width: 340px; text-align: center; }
+  .modal h3 { margin-bottom: 12px; font-size: 18px; }
+  .modal .btn { margin-top: 10px; width: 100%; }
+  .modal input[type="file"] { display: none; }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <!-- ===== WELCOME ===== -->
+  <div class="screen active" id="screen-welcome">
+    <div class="welcome">
+      <div class="mascot">🐱</div>
+      <h1>猫咪 MBTI</h1>
+      <p class="subtitle">20道题目，测测你家主子的真实猫格，生成专属身份证 🪪</p>
+      <div class="input-group">
+        <label>你家猫咪的名字</label>
+        <input type="text" id="catNameInput" placeholder="比如：小咪" maxlength="20">
+      </div>
+      <button class="btn btn-primary btn-block" onclick="startQuiz()">开始测试 🐾</button>
+    </div>
+  </div>
+
+  <!-- ===== QUIZ ===== -->
+  <div class="screen" id="screen-quiz">
+    <div class="quiz-header">
+      <span class="step" id="stepText">1/20</span>
+      <div class="progress-bar"><div class="fill" id="progressFill" style="width:0%"></div></div>
+    </div>
+    <div class="question-card">
+      <div class="dim-badge" id="dimBadge"></div>
+      <div class="emoji" id="qEmoji"></div>
+      <div class="q-text" id="qText"></div>
+      <div class="options" id="optionsEl"></div>
+    </div>
+  </div>
+
+  <!-- ===== RESULT ===== -->
+  <div class="screen" id="screen-result">
+    <div class="result">
+      <div class="result-type" id="resultType"></div>
+      <div class="result-name" id="resultName"></div>
+      <div class="result-role" id="resultRole"></div>
+      <div class="result-desc" id="resultDesc"></div>
+      <div class="cat-say" id="catSay"></div>
+      <div class="score-bars" id="scoreBars"></div>
+      <div class="tips-section" id="tipsSection"></div>
+      <div class="traits" id="traitsEl"></div>
+
+      <div class="id-card-section">
+        <div class="section-title">🐱 猫格身份证</div>
+        <div class="id-card" id="idCard">
+          <div class="id-card-body">
+            <div class="photo-area" id="photoArea" onclick="showPhotoModal()">
+              <span class="placeholder">📷</span>
+            </div>
+            <div class="info">
+              <div class="cat-name" id="cardCatName">—</div>
+              <div class="cat-type" id="cardType">—</div>
+              <div class="cat-oneliner" id="cardOneliner"></div>
+            </div>
+          </div>
+          <div class="id-card-footer">
+            <span id="cardDate"></span>
+            <span style="cursor:pointer;color:var(--orange-dark);font-weight:600" onclick="downloadCard()">⬇ 下载身份证</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button class="btn btn-secondary" onclick="restartQuiz()">🔄 重测</button>
+        <button class="btn btn-primary" onclick="shareCard()">📤 分享卡片</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Photo Modal -->
+  <div class="modal-overlay" id="photoModal">
+    <div class="modal">
+      <h3>上传猫咪照片</h3>
+      <p style="font-size:14px;color:var(--brown-light);margin-bottom:14px;">选一张主子的靓照做证件</p>
+      <input type="file" id="photoInput" accept="image/*" onchange="handlePhotoSelect(event)">
+      <button class="btn btn-primary" onclick="document.getElementById('photoInput').click()">📁 选择照片</button>
+      <button class="btn btn-secondary" onclick="closePhotoModal()">取消</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// =============================================
+// 20 questions, 4 options each
+// 5 dimensions: E/I, N/S, T/F, P/J, H/L
+// E/I 社交家/独行侠  N/S 探索家/现实派  T/F 理性派/感性派
+// P/J 随性派/规律派  H/L 猎手/面包
+// =============================================
+
+const questions = [
+  // — E/I (社交 vs 独处) —
+  {
+    dim: '社交', emoji: '🚪',
+    text: '门铃响了，外卖到了。你的猫？',
+    opts: [
+      { e:'😼', t:'第一时间冲到门口，看看是不是猫条来了', v:'E' },
+      { e:'🧐', t:'远远蹲着观察，确认安全再靠近', v:'E' },
+      { e:'😴', t:'躺在原地不动，又不是罐罐响', v:'I' },
+      { e:'🏃', t:'瞬间消失，躲进床底或衣柜深处', v:'I' },
+    ]
+  },
+  {
+    dim: '社交', emoji: '🧑‍🤝‍🧑',
+    text: '朋友第一次来家里做客，你的猫？',
+    opts: [
+      { e:'🐕', t:'主动蹭客人的腿，翻肚皮求摸', v:'E' },
+      { e:'🐱', t:'保持距离但不出房间，暗中观察', v:'E' },
+      { e:'👀', t:'躲在角落探头探脑，等人走了才出来', v:'I' },
+      { e:'🙈', t:'全程隐身，仿佛家里根本没养猫', v:'I' },
+    ]
+  },
+  {
+    dim: '社交', emoji: '🏥',
+    text: '带出门去宠物医院，在猫包里？',
+    opts: [
+      { e:'🌍', t:'好奇地东张西望，甚至想钻出来探索', v:'E' },
+      { e:'😗', t:'小声喵几句但不算太紧张', v:'E' },
+      { e:'🥺', t:'缩成一团，眼睛瞪大，偶尔发抖', v:'I' },
+      { e:'😱', t:'全程飞机耳+张嘴喘气，吓到石化', v:'I' },
+    ]
+  },
+  {
+    dim: '社交', emoji: '🐈',
+    text: '路上偶遇一只陌生猫，你的猫？',
+    opts: [
+      { e:'🤝', t:'凑上去闻鼻子，友好社交', v:'E' },
+      { e:'😼', t:'保持距离但好奇地盯着看', v:'E' },
+      { e:'😤', t:'炸毛哈气，警告对方别过来', v:'I' },
+      { e:'💨', t:'扭头就跑，跑得比什么都快', v:'I' },
+    ]
+  },
+
+  // — N/S (探索 vs 务实) —
+  {
+    dim: '探索', emoji: '🧸',
+    text: '买了一个会自己动的电动老鼠玩具？',
+    opts: [
+      { e:'🤩', t:'疯狂扑上去，叼起来满屋子跑', v:'N' },
+      { e:'🐾', t:'谨慎地用爪子拨拉几下，试试反应', v:'N' },
+      { e:'😒', t:'闻了闻，确认不是吃的，转身走开', v:'S' },
+      { e:'😴', t:'完全不感兴趣，继续睡自己的觉', v:'S' },
+    ]
+  },
+  {
+    dim: '探索', emoji: '📦',
+    text: '快递到了，地上多了一个空纸箱？',
+    opts: [
+      { e:'🎉', t:'火速钻进去，并宣布这是新领地', v:'N' },
+      { e:'🕵️', t:'先绕纸箱侦察三圈，再决定进不进去', v:'N' },
+      { e:'🤔', t:'闻一闻，然后毫无兴趣地走开', v:'S' },
+      { e:'🙅', t:'纸箱？不感兴趣，除非里面装过吃的', v:'S' },
+    ]
+  },
+  {
+    dim: '探索', emoji: '🪟',
+    text: '窗外飞过一只鸟，停在窗台上？',
+    opts: [
+      { e:'🦁', t:'立刻进入狩猎模式，发出咔咔咔的声音', v:'N' },
+      { e:'👀', t:'眼睛锁定目标，尾巴开始兴奋地甩', v:'N' },
+      { e:'😐', t:'抬头看一眼，确认不是吃的，继续舔毛', v:'S' },
+      { e:'💤', t:'压根没注意到，睡得正香', v:'S' },
+    ]
+  },
+  {
+    dim: '探索', emoji: '🪑',
+    text: '家里重新布置了家具位置？',
+    opts: [
+      { e:'🗺️', t:'兴奋！新地图！立刻巡逻并标记新领土', v:'N' },
+      { e:'🧐', t:'好奇地探索新布局，在每件家具上蹭蹭', v:'N' },
+      { e:'😕', t:'有点困惑但很快适应，接着睡觉', v:'S' },
+      { e:'😠', t:'明显不开心，在原来放沙发的地方来回转', v:'S' },
+    ]
+  },
+
+  // — T/F (理性 vs 感性) —
+  {
+    dim: '感性', emoji: '😢',
+    text: '你因为工作/感情崩溃大哭？',
+    opts: [
+      { e:'❤️', t:'立刻跑来蹭你、舔你手心，安静守在你身边', v:'F' },
+      { e:'🐾', t:'走过来趴在你腿上，用呼噜声安慰你', v:'F' },
+      { e:'🤨', t:'远远看一眼，确认不是猫条没了就继续睡', v:'T' },
+      { e:'😑', t:'完全无视，甚至觉得你有点吵', v:'T' },
+    ]
+  },
+  {
+    dim: '感性', emoji: '🤗',
+    text: '你强行把猫抱起来吸？',
+    opts: [
+      { e:'🥰', t:'立刻开始呼噜，眯眼睛，甚至踩奶', v:'F' },
+      { e:'😊', t:'不反抗但也不享受，给你面子忍十秒', v:'F' },
+      { e:'😒', t:'挣扎着想下地，浑身写着「放我下来」', v:'T' },
+      { e:'😾', t:'直接推开你的脸，必要时上爪子', v:'T' },
+    ]
+  },
+  {
+    dim: '感性', emoji: '💼',
+    text: '你换好衣服准备出门上班？',
+    opts: [
+      { e:'😿', t:'蹲在门口/行李箱上，试图用眼神挽留你', v:'F' },
+      { e:'🐾', t:'在你脚边绕来绕去，想让你多留一会儿', v:'F' },
+      { e:'😐', t:'淡定看着你出门，等你走了正好独享沙发', v:'T' },
+      { e:'🎉', t:'你终于走了！立刻开始跑酷庆祝自由', v:'T' },
+    ]
+  },
+  {
+    dim: '感性', emoji: '🍗',
+    text: '你在吃炸鸡，猫在远处看着？',
+    opts: [
+      { e:'🥺', t:'用最无辜的眼神盯着你，让你不忍心不给', v:'F' },
+      { e:'🐱', t:'凑过来蹭你腿卖萌，试图换取一口鸡肉', v:'F' },
+      { e:'😼', t:'直接跳上桌，准备自己动手丰衣足食', v:'T' },
+      { e:'😤', t:'不屑地看了你一眼——这都不是罐罐', v:'T' },
+    ]
+  },
+
+  // — P/J (随性 vs 规律) —
+  {
+    dim: '生活', emoji: '🍽️',
+    text: '关于吃饭这件事？',
+    opts: [
+      { e:'🎲', t:'自助餐模式，碗里永远有粮，饿了就吃几口', v:'P' },
+      { e:'⏰', t:'一天三顿定时喂，到点没放饭会小声催促', v:'P' },
+      { e:'📢', t:'到点必须开饭，晚一分钟就开始大声投诉', v:'J' },
+      { e:'👑', t:'有严格的用餐 SOP，食物摆放位置都不能错', v:'J' },
+    ]
+  },
+  {
+    dim: '生活', emoji: '😴',
+    text: '睡觉这件事情？',
+    opts: [
+      { e:'🎪', t:'全屋都是我的床，每天随机挑选幸运地点', v:'P' },
+      { e:'🔄', t:'有 5-6 个常用据点，不定期轮换', v:'P' },
+      { e:'📍', t:'每天固定睡三个地方，雷打不动', v:'J' },
+      { e:'🗓️', t:'连午觉和晚觉的地点都有明确区分', v:'J' },
+    ]
+  },
+  {
+    dim: '生活', emoji: '🧹',
+    text: '你刚铲完猫砂，换上干净的？',
+    opts: [
+      { e:'💩', t:'立刻进去拉一泡，用行动表达感谢', v:'P' },
+      { e:'🎉', t:'进去打滚玩沙，顺便上个厕所', v:'P' },
+      { e:'✅', t:'优雅地使用，仪式感满满', v:'J' },
+      { e:'🤌', t:'必须等猫砂铺平到标准厚度才肯用', v:'J' },
+    ]
+  },
+  {
+    dim: '生活', emoji: '🌙',
+    text: '凌晨三点，你的猫在干什么？',
+    opts: [
+      { e:'🏃', t:'满屋子跑酷蹦迪，你的脸是踏脚板', v:'P' },
+      { e:'🎤', t:'高歌一曲，告诉全小区今晚月色很美', v:'P' },
+      { e:'😴', t:'安静睡觉，作息比你还要规律', v:'J' },
+      { e:'🛏️', t:'固定睡在你枕头旁边，一觉到天亮', v:'J' },
+    ]
+  },
+
+  // — H/L (猎手 vs 面包) —
+  {
+    dim: '野性', emoji: '🪰',
+    text: '一只苍蝇飞进屋里？',
+    opts: [
+      { e:'🏹', t:'进入一级战备！不抓到绝不罢休，追到天涯海角', v:'H' },
+      { e:'👀', t:'眼睛追踪苍蝇的轨迹，偶尔跳起来扑一下', v:'H' },
+      { e:'😐', t:'看到苍蝇了，但懒得动——反正抓不到', v:'L' },
+      { e:'🍞', t:'根本没注意到有苍蝇，或者根本不关心', v:'L' },
+    ]
+  },
+  {
+    dim: '野性', emoji: '🌿',
+    text: '你带了一盆猫草/猫薄荷回家？',
+    opts: [
+      { e:'🤪', t:'疯了！打滚、蹭脸、流口水，完全失控', v:'H' },
+      { e:'😋', t:'开心地凑过去啃几口，然后躺平享受', v:'H' },
+      { e:'😐', t:'闻了闻，一般般，没有特别激动', v:'L' },
+      { e:'🙅', t:'不屑一顾——这啥？给朕拿开', v:'L' },
+    ]
+  },
+  {
+    dim: '野性', emoji: '🎣',
+    text: '你拿起逗猫棒的那一刻？',
+    opts: [
+      { e:'🤸', t:'瞳孔放大，飞扑过来，把你遛到体力不支', v:'H' },
+      { e:'🐾', t:'躺在地上用手扒拉两下，意思意思', v:'H' },
+      { e:'😴', t:'眼神跟随，但身体纹丝不动，躺着玩', v:'L' },
+      { e:'🙄', t:'看一眼逗猫棒，再看一眼你——幼稚', v:'L' },
+    ]
+  },
+  {
+    dim: '野性', emoji: '🏔️',
+    text: '家里最高的地方（衣柜顶/冰箱上）？',
+    opts: [
+      { e:'🧗', t:'早已征服，那是朕的专属观景台', v:'H' },
+      { e:'🤔', t:'试图上去但还没找到最佳路线', v:'H' },
+      { e:'😐', t:'知道那很高，但地上挺舒服的', v:'L' },
+      { e:'🍞', t:'高处？不存在的。我的世界只有地面和平', v:'L' },
+    ]
+  },
+];
+
+// ===== 32 Personality Types (5 dimensions: E/I, N/S, T/F, P/J, H/L) =====
+const results = {
+  // — H (Hunter) —
+  ENTPH: { name:'社交悍匪', role:'自来熟·越狱专家·永动机', emoji:'🦝',
+    desc:'陌生人=潜在猫条供应商。纸箱=新大陆。凌晨三点=黄金运动时间。你不是养猫，你在和一团快乐的混沌同居。', traits:['见人就蹭','开门高手','精力无限','一切皆玩具'], say:'"地球是朕的游乐场，而你只是刚好住在这里。"' },
+  ENFPH: { name:'热情 CEO', role:'粘人Leader·操心狂魔·社交花', emoji:'🦁',
+    desc:'你家的 COO（首席操心官）。客人来了要招待，快递来了要检查，你哭了要来哄。这个家没它得散。', traits:['护主狂魔','责任心强','社交天花板','爱操心'], say:'"这个家没我不行，你看你又忘买猫条了。"' },
+  ENTJH: { name:'天才黑客', role:'开锁专家·规则破坏者·脑力过剩', emoji:'🦊',
+    desc:'每天琢磨怎么打开你锁好的零食柜。拆快递比你还快。不是坏，是觉得规则只约束普通猫。', traits:['会开门','高智商犯罪','反骨','学习能力MAX'], say:'"指纹锁？在朕眼里只是个缓慢的投喂机。"' },
+  ENFJH: { name:'霸道猎手', role:'掌控一切·效率至上·行动派CEO', emoji:'🐯',
+    desc:'家就是它的公司，你是员工。吃饭必须在固定时间、固定地点——偏离 SOP，等待你的是无情喵喵投诉。但它捕猎时帅到爆炸。', traits:['气场两米八','执行力拉满','时间管理大师','捕猎高手'], say:'"我不是粘你，我是在行使管理权。请配合。"' },
+
+  ESTPH: { name:'快乐永动机', role:'派对动物·气氛组·人来疯', emoji:'🐶',
+    desc:'有一百种方法让你摸它，每一种都有效。见新人翻肚皮，见新玩具发疯，见虫子抓到底。快乐是它的出厂设置。', traits:['撒娇王者','人来疯','追虫高手','快乐传染'], say:'"活着就是为了玩！你不陪我玩就是浪费猫生！"' },
+  ESFPH: { name:'阳光猎手', role:'暖猫·家庭警察·秩序守护者', emoji:'🐕',
+    desc:'它觉得这个家有它在真好——叫你起床、监督你吃饭、抓飞虫保护你。不是妈，胜似妈。而且它抓虫子真的厉害。', traits:['温暖顾家','捕虫能手','操心命','可靠'], say:'"在你睡懒觉的时候，我已经抓了三只蚊子了。"' },
+  ESTJH: { name:'极限运动员', role:'跑酷高手·冒险狂·后悔率也高', emoji:'🐆',
+    desc:'没有它不敢跳的高度，没有它不敢抓的猎物。行动力极强，后悔率也很高——但下次还敢。你的心跳和它的弹跳成正相关。', traits:['高空作业','胆大包天','行动派','常在兽医那报到'], say:'"跳之前我没想那么多，跳完也不想。"' },
+  ESFJH: { name:'铁血教官', role:'纪律委员·战术大师·雷厉风行', emoji:'🦅',
+    desc:'你几点起床、几点喂饭、几点陪玩——它有严格的时间表。偏离了？等着被它追着咬脚后跟。捕猎时战术素养一流。', traits:['原则性强','守时狂魔','行动力强','战术天才'], say:'"晚一分钟放饭都是对猫权的侵犯。"' },
+
+  INTPH: { name:'独行猎手', role:'高智商·独立·脑力派猎手', emoji:'🐺',
+    desc:'对人类愚蠢行为充满鄙夷，但对自己的失败跳跃假装失忆。独自征服高地、独自猎杀蚊子、独自沉思——你只是它世界里的背景板。', traits:['高冷','独立思考','闷声干大事','选择性亲近'], say:'"我不需要你，但你可以留下来铲屎。"' },
+  INFPH: { name:'神秘游侠', role:'洞察人心·安静猎手·灵魂伴侣', emoji:'🦉',
+    desc:'它仿佛能读懂你的情绪。你开心它远远看着，你难过它悄悄靠近。打猎时安静而致命，爱你时沉默而深刻。', traits:['读懂人心','安静但致命','治愈系','深藏不露'], say:'"我知道你今天很难过，所以我抓了一只蟑螂给你。"' },
+  INTJH: { name:'独狼科学家', role:'逻辑狂·独立研究·生人勿近', emoji:'🐉',
+    desc:'它的世界里充满了实验——这个高度能跳吗？这个瓶盖能拨到第几下掉地上？你只是它实验室里的一个变量。', traits:['理工猫思维','自己玩','实验狂人','懒得理你'], say:'"我推杯子不是调皮，是在做重力加速度实验。"' },
+  INFJH: { name:'幕后猎手', role:'战略家·冷静观察·运筹帷幄', emoji:'🐲',
+    desc:'早已规划好全屋统治路线，只是懒得执行。每天观察你的一举一动，在关键节点精准出击（比如抢你枕头）。', traits:['深谋远虑','精准打击','冷静','掌控全局'], say:'"你以为你在养我？这个家谁是主子你看不出来？"' },
+
+  ISTPH: { name:'自由灵魂', role:'随性猎手·自己开心最重要', emoji:'🐈',
+    desc:'想玩就玩想睡就睡，抓虫子看心情，粘人也看心情。它有自己的节奏，你只能配合。但它开心的时候，整个家的气氛都会亮起来。', traits:['佛系猎手','随性','偶尔粘人','活在自己世界'], say:'"今天心情好，决定抓一只苍蝇送你。"' },
+  ISFPH: { name:'温柔猎手', role:'安静陪伴·默默守护·软刀子', emoji:'🐱',
+    desc:'看起来温温柔柔，抓猎物的时候从不含糊。它不会大张旗鼓地爱你，但你生病时它一定在床边。', traits:['温柔且强','默默守护','安静猎手','稳定输出'], say:'"你不用知道我在，但你回头我永远在。"' },
+  ISTJH: { name:'冷酷杀手', role:'实战派·能动手绝不喵喵', emoji:'🐈‍⬛',
+    desc:'拆快递专业户、飞虫终结者、抽屉开锁王。行动力拉满，交流欲为零。它爱你——但它不想让你知道。', traits:['行动派','沉默寡言','杀手本能','自己解决一切'], say:'"……"（它不想跟你说话）' },
+  ISFJH: { name:'老派绅士', role:'稳重猎手·按部就班·气场沉稳', emoji:'🎩',
+    desc:'生活按计划进行：早7点吃饭→中午巡查领地→晚9点蹲窗台值守。打破任何一条它都会给你脸色——但它确实靠谱。', traits:['规律生活','稳重可靠','老干部风','默默发光'], say:'"规矩就是规矩，哪怕只是一条猫。"' },
+
+  // — L (Loaf) —
+  ENTPL: { name:'佛系社牛', role:'爱社交但更爱躺·谁都好', emoji:'🦥',
+    desc:'它喜欢人类，但更喜欢躺着喜欢人类。陌生人来了会出来打招呼——然后就近躺下。它不是懒，只是觉得世界就该围着它的床转。', traits:['友善但懒','躺着社交','情绪稳定','随遇而安'], say:'"过来摸我。不，不用站起来，我过去躺你腿上。"' },
+  ENFPL: { name:'暖心面包', role:'猫界暖宝宝·情绪价值供应商', emoji:'🧸',
+    desc:'它的毕生所学就是在你腿上找到最舒服的位置。不会打扰你工作，但会在你熬夜时安静地瘫在键盘旁边陪着你。', traits:['粘人但不闹','温暖治愈','安静陪伴','颜值在线'], say:'"加班可以，但你的腿要借我趴。"' },
+  ENTJL: { name:'高冷哲学家', role:'思想上的巨人·行动上的面包', emoji:'🗿',
+    desc:'脑内构想了至少 17 种打开零食柜的方案。一个都没试过。思考比行动有趣多了——尤其是躺着思考。', traits:['思考家','只动脑不动手','深沉','实则很懒'], say:'"朕有九百个计划，但先眯一会儿再执行。"' },
+  ENFJL: { name:'退休 CEO', role:'曾经风云·如今养老·气场不减', emoji:'👑',
+    desc:'年轻时也是叱咤风云的猫物。现在？退休了。但家里的大小事务它还是要过问的——躺在沙发上过问。', traits:['气场犹在','指挥型猫才','退休心态','老干部'], say:'"这些事你们年轻人去办，朕在精神上支持。"' },
+
+  ESTPL: { name:'撒娇面包', role:'专业撒娇·颜值吃饭·快乐废猫', emoji:'🍞',
+    desc:'熟练掌握全套撒娇技能——翻肚皮、眨眼睛、奶声奶气。但它懒得站起来。它的核心理念：躺着也能赢。', traits:['撒娇王者','躺赢','表情包','可爱废物'], say:'"我不用动，你过来不就行了？"' },
+  ESFPL: { name:'居家小棉袄', role:'温柔·恋家·和平主义面包', emoji:'☁️',
+    desc:'世界上它最爱的地方就是你身边半径 50cm 以内。不惹事、不拆家、不乱跑。唯一的缺点是太平静了——有时候你忘了家里有猫。', traits:['温柔安静','极度恋家','和平使者','稳定输出'], say:'"冒险？不用了谢谢，我选择在家等你。"' },
+  ESTJL: { name:'沙发土豆', role:'躺平大师·活在裆下·快乐废猫', emoji:'🥔',
+    desc:'它的一生可以用四个字概括：吃、睡、躺、瘫。不是不会玩逗猫棒，是觉得躺着玩更有性价比。', traits:['躺平之王','懒出风格','佛到极致','也会卖萌'], say:'"站着玩多累啊，你蹲下来跟我玩。"' },
+  ESFJL: { name:'规律面包', role:'生活有节奏·只是节奏很慢', emoji:'⏳',
+    desc:'它的生活很有规律——早上在沙发睡、中午在飘窗睡、晚上在被窝睡。每件事都准时，只是所有的事都是睡觉。', traits:['规律','佛系','稳定','懒出哲学'], say:'"今天的日程表：睡觉。明天的也是。"' },
+
+  INTPL: { name:'孤高面包', role:'独来独往·活在自己世界·拒绝内卷', emoji:'🌙',
+    desc:'它不需要任何人——除了开罐器（也就是你）。大部分时间在发呆、午睡、看窗外。偶尔会来确认你还有呼吸，然后继续独处。', traits:['极度独立','不粘人','喜欢独处','偶尔关心'], say:'"我一个人挺好。但罐罐你还是要开的。"' },
+  INFPL: { name:'安静天使', role:'安静陪伴·治愈人心·存在即美好', emoji:'🕊️',
+    desc:'它不吵不闹不拆家，只是安静地存在着。你看书时它在旁边，你睡觉时它在床尾。它的爱像空气——不喧哗但是不可或缺。', traits:['安静','治愈','温柔','灵魂伴侣'], say:'"我在。不需要说话，但你感觉得到。"' },
+  INTJL: { name:'猫形算法', role:'逻辑且佛系·脑子好用但懒得用', emoji:'🤖',
+    desc:'从 A 点到 B 点的最短路径？它算出来了。但它选择不走。思考让它快乐，执行让它疲惫。', traits:['智商在线','但懒得动','理性','佛系天才'], say:'"最优解是——等你把碗端过来。"' },
+  INFJL: { name:'退休军师', role:'曾经运筹帷幄·如今安享晚年', emoji:'📜',
+    desc:'它把全家的布局都规划好了，但懒得管了。现在的它只是一个安静的老干部，在阳光最好的角落回忆当年的辉煌。', traits:['曾经辉煌','现在佛系','内心丰富','安然自若'], say:'"想当年……算了不想了，太阳好舒服。"' },
+
+  ISTPL: { name:'慵懒艺术家', role:'佛系·美学·阳光收集者', emoji:'🎨',
+    desc:'它在阳光最好的角落找到最优雅的姿势。不争不抢不闹，但该有的猫条一根不能少。它的猫生哲学是：美就够了。', traits:['优雅','佛系','审美极佳','安静'], say:'"我不是懒，我是在创作名为《午后》的行为艺术。"' },
+  ISFPL: { name:'温柔面包', role:'岁月静好·与世无争·可爱本猫', emoji:'🍰',
+    desc:'世界上最柔软的存在。从不生气、从不拆家、从不高冷。它唯一的诉求就是——能在你旁边安安静静地团成一个面包。', traits:['温柔','安静','可爱','信任人类'], say:'"有你在，有太阳在，有饭在。完美。"' },
+  ISTJL: { name:'冷淡面包', role:'沉默·独立·不靠撒娇吃饭', emoji:'🗻',
+    desc:'它用行动表达一切——也就是说，基本不表达。不粘人、不撒娇、不惹事。但它会在你睡着后偷偷闻你的脸。', traits:['沉默','独立','冷酷外表柔软内心','不表达但爱'], say:'"……"（它认为情感不需要言语）' },
+  ISFJL: { name:'退休老干部', role:'按部就班·稳定输出·家中定海神针', emoji:'🏠',
+    desc:'生活就是节奏——早睡早起、按时吃饭、固定如厕。不乱跑不闹腾。它在这个家最久，见过最多的罐头，是真正的老前辈。', traits:['规律','稳重','可靠','岁月沉淀'], say:'"年轻人不要浮躁。罐罐会有的，太阳也会有的。"' },
+};
+
+// ===== State =====
+let catName = '';
+let scores = { E:0, I:0, N:0, S:0, T:0, F:0, P:0, J:0, H:0, L:0 };
+let currentQ = 0;
+let catPhoto = null;
+
+const dimNames = {
+  '社交': '社交倾向', '探索': '探索精神', '感性': '情感温度', '生活': '生活态度', '野性': '野性指数'
+};
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function startQuiz() {
+  const input = document.getElementById('catNameInput');
+  catName = input.value.trim() || '我家猫';
+  scores = { E:0, I:0, N:0, S:0, T:0, F:0, P:0, J:0, H:0, L:0 };
+  currentQ = 0;
+  showScreen('screen-quiz');
+  renderQuestion();
+}
+
+function renderQuestion() {
+  const q = questions[currentQ];
+  document.getElementById('stepText').textContent = `${currentQ + 1}/20`;
+  document.getElementById('progressFill').style.width = `${(currentQ / 20) * 100}%`;
+  document.getElementById('dimBadge').textContent = dimNames[q.dim] || '';
+  document.getElementById('qEmoji').textContent = q.emoji;
+  document.getElementById('qText').textContent = q.text;
+
+  const optsEl = document.getElementById('optionsEl');
+  optsEl.innerHTML = '';
+  const shuffled = [...q.opts].sort(() => Math.random() - 0.5);
+  shuffled.forEach((opt, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'option';
+    btn.innerHTML = `<span class="opt-emoji">${opt.e}</span>${opt.t}`;
+    btn.onclick = () => answerQuestion(opt.v);
+    optsEl.appendChild(btn);
+  });
+}
+
+function answerQuestion(value) {
+  scores[value]++;
+  currentQ++;
+  if (currentQ >= questions.length) {
+    showResult();
+  } else {
+    renderQuestion();
+    document.getElementById('progressFill').style.width = `${(currentQ / 20) * 100}%`;
+    document.getElementById('stepText').textContent = `${currentQ + 1}/20`;
+  }
+}
+
+function computeType() {
+  return (scores.E >= scores.I ? 'E' : 'I') +
+         (scores.N >= scores.S ? 'N' : 'S') +
+         (scores.T >= scores.F ? 'T' : 'F') +
+         (scores.P >= scores.J ? 'P' : 'J') +
+         (scores.H >= scores.L ? 'H' : 'L');
+}
+
+function dimBar(label, left, right, leftScore, rightScore) {
+  const total = leftScore + rightScore || 1;
+  const leftPct = Math.round((leftScore / total) * 100);
+  const winner = leftScore >= rightScore ? left : right;
+  return { label, left, right, leftScore, rightScore, leftPct, winner };
+}
+
+// ===== 相处建议：根据五个维度的胜负，动态生成 =====
+function getTips(bars) {
+  const tips = [];
+  bars.forEach(b => {
+    const w = b.winner;
+    if (w.includes('E')) tips.push({ e:'🎉', t:'它是社交型猫猫——多邀请朋友来家里、多跟它说话互动，它会很开心，甚至会主动参与你的聚会。' });
+    if (w.includes('I')) tips.push({ e:'🏠', t:'它是独处型猫猫——给它准备几个安静的藏身角落（纸箱、猫窝隧道），不要强行社交，让它自己决定什么时候来找你。' });
+    if (w.includes('N')) tips.push({ e:'🧸', t:'它充满好奇心——定期更换玩具、增加新纸箱、偶尔变换家里的小布置，它需要新鲜感的刺激。' });
+    if (w.includes('S')) tips.push({ e:'☀️', t:'它是务实派——它重视稳定的环境，熟悉的窝、固定的晒太阳位置比新玩具更能给它安全感。' });
+    if (w.includes('F')) tips.push({ e:'💕', t:'它是感性猫猫——它需要你的回应。多摸摸它、跟它说说话、回应它的蹭蹭和呼噜，情感连接对它是必需品。' });
+    if (w.includes('T')) tips.push({ e:'🤝', t:'它是理性猫猫——尊重它的独立空间，它来找你的时候你再回应，不要强抱强亲。它用行动表达爱，不需要太多仪式感。' });
+    if (w.includes('P')) tips.push({ e:'🎪', t:'它是随性自由派——不要试图给它排作息表，接受它凌晨跑酷、随心所欲的生活节奏。灵活响应就是最好的相处方式。' });
+    if (w.includes('J')) tips.push({ e:'⏰', t:'它是规律主义者——固定时间喂食、固定时间陪玩，任何变动都可能让它焦虑。建立一个可预测的日常，它会更安心。' });
+    if (w.includes('H')) tips.push({ e:'🏹', t:'它是天生的猎手——每天至少要陪它玩逗猫棒或扔球 15 分钟，满足它的捕猎本能。漏食玩具、嗅闻垫也是好选择。' });
+    if (w.includes('L')) tips.push({ e:'🛋️', t:'它是佛系面包——不要强迫它运动。在它喜欢瘫着的地方多放软垫，偶尔用零食引导它动一动就够了，尊重它的慢节奏。' });
+  });
+  return tips;
+}
+
+function showResult() {
+  const type = computeType();
+  const r = results[type] || Object.values(results)[0];
+
+  document.getElementById('resultType').textContent = `🐾 猫格类型 · ${type}`;
+  document.getElementById('resultName').textContent = r.name;
+  document.getElementById('resultRole').textContent = r.role;
+  document.getElementById('resultDesc').textContent = r.desc;
+  document.getElementById('catSay').textContent = r.say;
+
+  // Traits
+  document.getElementById('traitsEl').innerHTML = r.traits.map(t => `<span class="trait">${t}</span>`).join('');
+
+  // Score bars
+  const bars = [
+    dimBar('社交', '外向 E', '内向 I', scores.E, scores.I),
+    dimBar('探索', '直觉 N', '实感 S', scores.N, scores.S),
+    dimBar('感性', '情感 F', '理性 T', scores.F, scores.T),
+    dimBar('生活', '随性 P', '规律 J', scores.P, scores.J),
+    dimBar('野性', '猎手 H', '面包 L', scores.H, scores.L),
+  ];
+  document.getElementById('scoreBars').innerHTML = bars.map(b => `
+    <div class="score-row">
+      <span>${b.label}</span>
+      <span class="dim-label ${b.winner === b.left ? 'winner' : ''}">${b.left}</span>
+      <span style="font-size:11px">${b.leftScore}</span>
+      <div class="bar-wrap">
+        <div class="bar-left" style="width:${b.leftPct}%"></div>
+        <div class="bar-right" style="width:${100-b.leftPct}%"></div>
+      </div>
+      <span style="font-size:11px">${b.rightScore}</span>
+      <span class="dim-label ${b.winner === b.right ? 'winner' : ''}">${b.right}</span>
+    </div>
+  `).join('');
+
+  // 相处建议
+  const tips = getTips(bars);
+  document.getElementById('tipsSection').innerHTML = `
+    <div class="tips-title">💡 和 ${catName} 相处的小建议</div>
+    ${tips.map(t => `<div class="tip-item"><span class="tip-emoji">${t.e}</span><span>${t.t}</span></div>`).join('')}
+  `;
+
+  // ID Card
+  document.getElementById('cardCatName').textContent = catName;
+  document.getElementById('cardType').textContent = `${type} · ${r.name}`;
+  document.getElementById('cardOneliner').textContent = r.role;
+  document.getElementById('cardDate').textContent = new Date().toLocaleDateString('zh-CN', { year:'numeric', month:'long', day:'numeric' });
+
+  updatePhotoArea();
+  showScreen('screen-result');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// Photo
+function showPhotoModal() { document.getElementById('photoModal').classList.add('show'); }
+function closePhotoModal() { document.getElementById('photoModal').classList.remove('show'); }
+function handlePhotoSelect(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) { catPhoto = e.target.result; updatePhotoArea(); closePhotoModal(); };
+  reader.readAsDataURL(file);
+}
+function updatePhotoArea() {
+  document.getElementById('photoArea').innerHTML = catPhoto
+    ? `<img src="${catPhoto}" alt="猫猫照片">`
+    : '<span class="placeholder">📷</span>';
+}
+
+function restartQuiz() { catPhoto = null; document.getElementById('catNameInput').value = ''; showScreen('screen-welcome'); }
+
+function roundRect(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.lineTo(x + w - r, y);
+  ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+  ctx.lineTo(x + w, y + h - r);
+  ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+  ctx.lineTo(x + r, y + h);
+  ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+  ctx.lineTo(x, y + r);
+  ctx.quadraticCurveTo(x, y, x + r, y);
+  ctx.closePath();
+}
+
+function downloadCard() {
+  const card = document.getElementById('idCard');
+  const scale = 2;
+  const pad = 24;
+  const photoS = 85, photoR = 16;
+  const photoX = pad, photoY = pad + 6;
+  const textX = photoX + photoS + 18;
+  const w = card.offsetWidth, h = card.offsetHeight;
+  const type = computeType();
+  const r = results[type];
+  const today = new Date().toLocaleDateString('zh-CN', { year:'numeric', month:'long', day:'numeric' });
+
+  const canvas = document.createElement('canvas');
+  canvas.width = w * scale;
+  canvas.height = h * scale;
+  const ctx = canvas.getContext('2d');
+  ctx.scale(scale, scale);
+
+  // Card bg
+  const grad = ctx.createLinearGradient(0, 0, w, h);
+  grad.addColorStop(0, '#FFFEF9');
+  grad.addColorStop(1, '#FFF8EE');
+  roundRect(ctx, 0, 0, w, h, 20);
+  ctx.fillStyle = grad; ctx.fill();
+  ctx.strokeStyle = '#D4A853'; ctx.lineWidth = 3; ctx.stroke();
+
+  // Footer divider
+  ctx.beginPath();
+  ctx.setLineDash([4, 4]);
+  ctx.moveTo(pad, h - 44);
+  ctx.lineTo(w - pad, h - 44);
+  ctx.strokeStyle = '#E8D5C4'; ctx.lineWidth = 1; ctx.stroke();
+  ctx.setLineDash([]);
+
+  // Footer text
+  ctx.fillStyle = '#C4A882'; ctx.font = '10px -apple-system, sans-serif';
+  ctx.fillText(today, pad, h - 18);
+  ctx.textAlign = 'right';
+  ctx.fillText('猫格身份证', w - pad, h - 18);
+  ctx.textAlign = 'left';
+
+  function drawTexts() {
+    // Name
+    ctx.fillStyle = '#4A3728'; ctx.font = 'bold 20px -apple-system, sans-serif';
+    ctx.fillText(catName, textX, photoY + 30);
+
+    // Type badge
+    const typeStr = `${type} · ${r.name}`;
+    ctx.font = '12px -apple-system, sans-serif';
+    const tm = ctx.measureText(typeStr);
+    const tagW = tm.width + 20, tagH = 22, tagY = photoY + 46;
+    roundRect(ctx, textX, tagY, tagW, tagH, 11);
+    ctx.fillStyle = '#FFF0E0'; ctx.fill();
+    ctx.fillStyle = '#E8923E'; ctx.fillText(typeStr, textX + 10, tagY + 15);
+
+    // Role one-liner
+    ctx.fillStyle = '#8B7355'; ctx.font = '12px -apple-system, sans-serif';
+    ctx.fillText(r.role, textX, tagY + 38);
+
+    // Done → trigger download
+    canvas.toBlob(blob => {
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.download = `${catName}-猫格身份证.png`;
+      a.href = url; a.click();
+      URL.revokeObjectURL(url);
+    }, 'image/png');
+  }
+
+  // Photo
+  roundRect(ctx, photoX, photoY, photoS, photoS, photoR);
+  ctx.save(); ctx.clip();
+  if (catPhoto) {
+    const img = new Image();
+    img.onload = function() {
+      ctx.drawImage(img, photoX, photoY, photoS, photoS);
+      ctx.restore();
+      drawTexts();
+    };
+    img.src = catPhoto;
+  } else {
+    ctx.fillStyle = '#FFF0E0'; ctx.fill();
+    ctx.restore();
+    ctx.fillStyle = '#C4A882'; ctx.font = '32px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('📷', photoX + photoS / 2, photoY + photoS / 2 + 11);
+    ctx.textAlign = 'left';
+    drawTexts();
+  }
+}
+
+async function shareCard() {
+  const type = computeType();
+  const r = results[type];
+  const link = window.location.href.startsWith('http') ? window.location.href : '';
+  const linkLine = link ? `\n来测 → ${link}` : '';
+  const text = `🐱 ${catName}的猫格是 ${type} · ${r.name}！\n${r.role}${linkLine}`;
+  try {
+    if (navigator.share) {
+      const shareData = { title: `${catName}的猫格身份证`, text };
+      if (link) shareData.url = link;
+      await navigator.share(shareData);
+      return;
+    }
+  } catch(e) {}
+  try {
+    await navigator.clipboard.writeText(text);
+    alert('已复制分享文案和链接，去粘贴给猫友吧！');
+  } catch(e) {
+    alert('分享暂不可用，可以截图发给朋友哦 📸');
+  }
+}
+
+document.getElementById('photoModal').addEventListener('click', function(e) {
+  if (e.target === this) closePhotoModal();
+});
+</script>
+</body>
+</html>
