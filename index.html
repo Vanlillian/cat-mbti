@@ -100,6 +100,14 @@
   .option .opt-emoji { font-size: 22px; flex-shrink: 0; }
   .option:active { transform: scale(0.98); background: #FFF0E0; border-color: var(--orange); }
 
+  .btn-back {
+    display: block; width: 100%; margin-top: 14px;
+    padding: 12px; background: none; border: none;
+    font-size: 14px; color: var(--brown-light); cursor: pointer;
+    border-radius: 12px; transition: background 0.15s;
+  }
+  .btn-back:active { background: #F5EDE4; }
+
   /* Result */
   .result { text-align: center; padding: 20px 0; }
   .result-type {
@@ -220,6 +228,7 @@
       <div class="emoji" id="qEmoji"></div>
       <div class="q-text" id="qText"></div>
       <div class="options" id="optionsEl"></div>
+      <button class="btn-back" id="btnBack" onclick="goBack()" style="display:none">← 上一题</button>
     </div>
   </div>
 
@@ -576,6 +585,7 @@ let catName = '';
 let scores = { E:0, I:0, N:0, S:0, T:0, F:0, P:0, J:0, H:0, L:0 };
 let currentQ = 0;
 let catPhoto = null;
+let answers = [];
 
 const dimNames = {
   '社交': '社交倾向', '探索': '探索精神', '感性': '情感温度', '生活': '生活态度', '野性': '野性指数'
@@ -590,6 +600,7 @@ function startQuiz() {
   const input = document.getElementById('catNameInput');
   catName = input.value.trim() || '我家猫';
   scores = { E:0, I:0, N:0, S:0, T:0, F:0, P:0, J:0, H:0, L:0 };
+  answers = [];
   currentQ = 0;
   showScreen('screen-quiz');
   renderQuestion();
@@ -602,6 +613,7 @@ function renderQuestion() {
   document.getElementById('dimBadge').textContent = dimNames[q.dim] || '';
   document.getElementById('qEmoji').textContent = q.emoji;
   document.getElementById('qText').textContent = q.text;
+  document.getElementById('btnBack').style.display = currentQ > 0 ? 'block' : 'none';
 
   const optsEl = document.getElementById('optionsEl');
   optsEl.innerHTML = '';
@@ -616,6 +628,7 @@ function renderQuestion() {
 }
 
 function answerQuestion(value) {
+  answers[currentQ] = value;
   scores[value]++;
   currentQ++;
   if (currentQ >= questions.length) {
@@ -625,6 +638,19 @@ function answerQuestion(value) {
     document.getElementById('progressFill').style.width = `${(currentQ / 20) * 100}%`;
     document.getElementById('stepText').textContent = `${currentQ + 1}/20`;
   }
+}
+
+function goBack() {
+  if (currentQ === 0) return;
+  currentQ--;
+  const lastAnswer = answers[currentQ];
+  if (lastAnswer) {
+    scores[lastAnswer]--;
+    answers[currentQ] = null;
+  }
+  renderQuestion();
+  document.getElementById('progressFill').style.width = `${(currentQ / 20) * 100}%`;
+  document.getElementById('stepText').textContent = `${currentQ + 1}/20`;
 }
 
 function computeType() {
